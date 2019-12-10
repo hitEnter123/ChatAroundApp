@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONObject;
 
-public class UserProfileSetup extends AppCompatActivity {
+public class UserProfileSetupActivity extends AppCompatActivity {
 
   private  EditText username, userage;
   String useremail;
