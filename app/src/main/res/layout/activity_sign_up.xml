@@ -29,14 +29,14 @@
 
             <EditText
                 android:id="@+id/sign_up_password"
-
+                android:inputType="textPassword"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:hint="Password" />
 
             <EditText
                 android:id="@+id/sign_up_confirm_password"
-
+                android:inputType="textPassword"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:hint="Confirm Password" />
@@ -47,6 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/custom_button"
+
                 android:text="Sign Up" />
 
 

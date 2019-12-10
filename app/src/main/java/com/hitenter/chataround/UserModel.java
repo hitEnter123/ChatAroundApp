@@ -4,9 +4,12 @@ public class UserModel {
 
 
     String name, gender, email;
-    int age;
+    String age;
 
-    public UserModel(String name, String gender, String email, int age) {
+    public UserModel(){}
+
+
+    public UserModel(String name, String gender, String email, String age) {
         this.name = name;
         this.gender = gender;
         this.email = email;
@@ -38,11 +41,11 @@ public class UserModel {
         this.email = email;
     }
 
-    public int getAge() {
+    public String getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(String age) {
         this.age = age;
     }
 }

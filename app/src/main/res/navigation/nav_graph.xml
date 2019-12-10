@@ -7,7 +7,7 @@
 
     <activity
         android:id="@+id/mainActivity"
-        android:name="com.hitenter.chataround.MainActivity"
+        android:name="com.hitenter.chataround.LoginActivity"
         android:label="activity_main"
         tools:layout="@layout/activity_main" />
     <fragment

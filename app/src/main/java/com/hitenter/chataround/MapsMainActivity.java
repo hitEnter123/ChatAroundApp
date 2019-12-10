@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -11,7 +12,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -25,6 +25,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         setContentView(R.layout.activity_maps_main);
 
         bindViews();
+
+        Log.d("MAPS MAIN USER ", "onCreate:  " + LoginActivity.user.age);
 
         //SignOut
         signOut.setOnClickListener(new View.OnClickListener() {
@@ -68,7 +70,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private void userSignOut( )  {
 
         FirebaseAuth.getInstance().signOut();
-        Intent authPageIntent = new Intent(MapsMainActivity.this, MainActivity.class);
+        Intent authPageIntent = new Intent(MapsMainActivity.this, LoginActivity.class);
         startActivity(authPageIntent);
         MapsMainActivity.this.finish();
 
