@@ -2,6 +2,7 @@ package com.hitenter.chataround;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -57,6 +58,10 @@ public class UserProfileSetupActivity extends AppCompatActivity {
     StorageReference userFolderStoRef = firebaseStorage.getReference().child("user/");
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     DatabaseReference userListDataRef = firebaseDatabase.getReference("user_list/");
+
+
+    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +137,7 @@ public class UserProfileSetupActivity extends AppCompatActivity {
 
 
 
-    //TODO 1: Demonstrate different method of linking onClick to View
+    //TODO PT2- 1: Demonstrate different method of linking onClick to View
     public void onRadioButtonClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
 
@@ -166,7 +171,7 @@ public class UserProfileSetupActivity extends AppCompatActivity {
     }
 
     //Create User Profile
-    //TODO 2 : ADD LOGIC
+    //TODO PT2- 2 : ADD LOGIC
     private void createUserProfile(EditText username, EditText userage, String useremail , String usergenderString) {
 
         String usernameString = username.getText().toString();
@@ -194,13 +199,14 @@ public class UserProfileSetupActivity extends AppCompatActivity {
     }
 
 
-    //TODO 3: UserProfile Upload
+    //TODO PT2- 3: UserProfile Upload
     private void uploadUserProfileToDatabase (final String usernameString, final UserModel newUser){
 
         userListDataRef.child(usernameString).setValue(newUser).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-
+                final LoadingDialogClass loadingDialogClass = new LoadingDialogClass();
+                loadingDialogClass.show(ft, "dialog");
                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                         .setDisplayName(usernameString)
                         .build();
@@ -211,9 +217,12 @@ public class UserProfileSetupActivity extends AppCompatActivity {
                         Toast.makeText(UserProfileSetupActivity.this, "Firebase User Profile update successful.",
                                 Toast.LENGTH_SHORT).show();
 
+
                         Intent mapsMainIntent = new Intent(UserProfileSetupActivity.this, MapsMainActivity.class);
                         startActivity(mapsMainIntent);
                         UserProfileSetupActivity.this.finish();
+
+                        loadingDialogClass.dismiss();
 
                     }
                 });
@@ -223,11 +232,12 @@ public class UserProfileSetupActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 showErrorDialog("Error ! ","Profile submission failed" + e);
+                ft.addToBackStack("dialog");
             }
         });
     }
 
-    //TODO 4: Error handling - show Error Dialog * IF form not complete ? *
+    //TODO PT2- 4: Error handling - show Error Dialog * IF form not complete ? *
     private void showErrorDialog(String title, String message) {
         new AlertDialog.Builder(this)
                 .setTitle(title)
@@ -240,7 +250,7 @@ public class UserProfileSetupActivity extends AppCompatActivity {
 
 
 
-    //TODO 5: Check if username already Exists
+    //TODO PT2- 5: Check if username already Exists
     private void checkUserNameAvailability(final String usernameString, final UserModel newUser) {
 
         userListDataRef.addListenerForSingleValueEvent(new ValueEventListener() {

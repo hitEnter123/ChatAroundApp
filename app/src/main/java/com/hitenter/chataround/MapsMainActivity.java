@@ -7,16 +7,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.firebase.auth.FirebaseAuth;
 
+
+//TODO PT1-5 create XML layout according to docs and set mapfragment
+
 public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
 
     Button signOut;
+    TextView usernameAppBar;
 
 
     @Override
@@ -26,7 +31,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
         bindViews();
 
-        Log.d("MAPS MAIN USER ", "onCreate:  " + LoginActivity.user.age);
 
         //SignOut
         signOut.setOnClickListener(new View.OnClickListener() {
@@ -48,6 +52,12 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
+        Log.d("MAPS MAIN USER ", "onCreate:  " + LoginActivity.user.age);
+
+        usernameAppBar.setText(LoginActivity.user.name);
+
+
+
 
     }
 
@@ -60,13 +70,15 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private void bindViews ()  {
 
         signOut = findViewById(R.id.sign_out);
-
+        usernameAppBar = findViewById(R.id.username_appbar);
 
 
 
     }
 
 
+
+    //TODO PT1-6 signOut logic
     private void userSignOut( )  {
 
         FirebaseAuth.getInstance().signOut();

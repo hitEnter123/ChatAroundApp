@@ -64,6 +64,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     }
 
+    //TODO PT1 - 1 : Signup logic refer to google documentation , intent
 
     private void signUp(String email, String password) {
 
@@ -96,6 +97,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
 
+    //TODO PT1 -3 : Need to do some checks - empty , password matching, RegExp
     private void checkAndSignUp(EditText email, EditText password, EditText confirmPassword) {
         String emailString = email.getText().toString();
         String passwordString = password.getText().toString();

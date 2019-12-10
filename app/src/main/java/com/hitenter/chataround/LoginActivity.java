@@ -2,6 +2,8 @@ package com.hitenter.chataround;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -34,17 +36,22 @@ public class LoginActivity extends AppCompatActivity {
     DatabaseReference firebaseDataRef = firebaseDatabase.getReference().child("user_list/");
     public static UserModel user;
 
+
+
     @Override
     protected void onStart() {
         super.onStart();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
 
+        //TODO PT1-4 : check if any user is logged in
         if (currentUser != null) {
 
-
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            LoadingDialogClass loadingDialogClass = new LoadingDialogClass();
+            loadingDialogClass.show(ft, "dialog");
             Log.d("Login", "signInWithEmail: user is " + currentUser.getDisplayName());
 
-            //TODO LT2 - 6 create static user and INTENT CONDITION
+
 
             if (currentUser.getDisplayName() == null || currentUser.getDisplayName().equals("")) {
                 Intent mapIntent = new Intent(LoginActivity.this, UserProfileSetupActivity.class);
@@ -58,8 +65,11 @@ public class LoginActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                         Log.d("findUser", "value : " + dataSnapshot.getValue(UserModel.class));
-
+                        //TODO PT2 - 6 create static user and INTENT CONDITION
                         user = dataSnapshot.getValue(UserModel.class);
+
+
+
                         Intent mapIntent = new Intent(LoginActivity.this, MapsMainActivity.class);
                         startActivity(mapIntent);
                         LoginActivity.this.finish();
@@ -112,41 +122,70 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+
+    //TODO PT1 - 2: login logic
     private void login(EditText email, EditText password) {
         String emailString = email.getText().toString();
         String passwordString = password.getText().toString();
+        Boolean emptyPass = false;
 
 
-        firebaseAuth.signInWithEmailAndPassword(emailString, passwordString).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
+        emptyPass = emptyCheck(email, password);
 
-                if (task.isSuccessful()) {
-                    FirebaseUser user = firebaseAuth.getCurrentUser();
-
-                    Log.d("Login", "signInWithEmail: user is " + user);
+        if (emptyPass) {
 
 
-                    Intent mapIntent = new Intent(LoginActivity.this, MapsMainActivity.class);
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            final LoadingDialogClass loadingDialogClass = new LoadingDialogClass();
+            loadingDialogClass.show(ft, "dialog");
+
+            firebaseAuth.signInWithEmailAndPassword(emailString, passwordString).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+
+                    if (task.isSuccessful()) {
+                        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
 
 
-                    startActivity(mapIntent);
+                        firebaseDataRef.child(currentUser.getDisplayName()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                Log.d("findUser", "value : " + dataSnapshot.getValue(UserModel.class));
+
+                                user = dataSnapshot.getValue(UserModel.class);
+
+                                Intent mapIntent = new Intent(LoginActivity.this, MapsMainActivity.class);
 
 
-                    LoginActivity.this.finish();
+                                startActivity(mapIntent);
 
 
-                } else {
-                    Log.w("Login", "signInWithEmail:failure", task.getException());
-                    Toast.makeText(LoginActivity.this, "Authentication failed.",
-                            Toast.LENGTH_SHORT).show();
+                                LoginActivity.this.finish();
+
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+
+                    } else {
+                        Log.w("Login", "signInWithEmail:failure", task.getException());
+                        Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                Toast.LENGTH_SHORT).show();
+
+                        loadingDialogClass.dismiss();
+
+                    }
 
 
                 }
-
-
-            }
-        });
+            });
+        }
 
 
     }
@@ -158,4 +197,31 @@ public class LoginActivity extends AppCompatActivity {
         login = findViewById(R.id.login);
         signUp = findViewById(R.id.sign_up);
     }
+
+    private Boolean emptyCheck(EditText email, EditText password) {
+
+        EditText[] editTexts = {email, password};
+
+        Boolean pass = false;
+
+
+        for (int i = 0; i < editTexts.length; i++) {
+
+            if (editTexts[i].getText().toString().isEmpty()) {
+
+                editTexts[i].setError("Please Fill in");
+                pass = false;
+
+            } else pass = true;
+
+
+        }
+
+
+        return pass;
+
+
+    }
+
+
 }

@@ -32,4 +32,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.976" />
 
+    <TextView
+        android:id="@+id/username_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@drawable/custom_button"
+        android:text=""
+        android:textSize="30dp"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:textFontWeight="800"
+
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="-16dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
