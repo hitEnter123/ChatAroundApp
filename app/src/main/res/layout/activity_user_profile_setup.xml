@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UserProfileSetupActivity">
+
+    <EditText
+        android:id="@+id/user_profile_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Username"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/user_profile_age"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_age"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_age"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.47" />
+
+    <EditText
+        android:id="@+id/user_profile_age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Age"
+        android:inputType="number"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.679" />
+
+    <Button
+        android:id="@+id/user_profile_submit_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/custom_button"
+        android:text="Submit"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_age"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_age"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile_age"
+        app:layout_constraintVertical_bias="0.488" />
+
+    <CheckBox
+        android:id="@+id/user_profile_male"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Male"
+        app:layout_constraintBottom_toBottomOf="@+id/gender_text"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_neutral"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_neutral"
+        app:layout_constraintTop_toTopOf="@+id/gender_text"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <CheckBox
+        android:id="@+id/user_profile_female"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="13dp"
+        android:text="Female"
+        app:layout_constraintBottom_toTopOf="@+id/user_profile_age"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_neutral"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_neutral"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile_male"
+        app:layout_constraintVertical_bias="0.066" />
+
+    <TextView
+        android:id="@+id/gender_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gender"
+        app:layout_constraintBottom_toTopOf="@+id/user_profile_age"
+        app:layout_constraintStart_toStartOf="@+id/user_profile_age"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile_username"
+        app:layout_constraintVertical_bias="0.196" />
+
+    <CheckBox
+        android:id="@+id/user_profile_neutral"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="21dp"
+        android:text="Prefer not to tell"
+        app:layout_constraintBottom_toTopOf="@+id/user_profile_age"
+        app:layout_constraintEnd_toEndOf="@+id/user_profile_age"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/gender_text"
+        app:layout_constraintTop_toBottomOf="@+id/user_profile_female"
+        app:layout_constraintVertical_bias="0.0" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
