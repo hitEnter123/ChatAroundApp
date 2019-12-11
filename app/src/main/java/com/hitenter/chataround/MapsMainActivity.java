@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//TODO PT 3-1, implement OnMapReadyCallback and implement all the necessary methods
 public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     //Constant
@@ -74,6 +75,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
 
+    //TODO PT 3-3-1, add GeoFire member variable
     //Geofire
     private GeoFire mGeoFire;
 
@@ -83,7 +85,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     //My details
     private String mMyUserName;
-    private String mMyEmail;
 
     //Other users
     private Map<String, Marker> otherUsersMarkersMap;
@@ -117,9 +118,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         mGeoFire = new GeoFire(pathToGeoFire);
 
         //My email
-        assert mUser != null;
-        mMyEmail = mUser.getEmail();
-        mMyUserName = "Choo Lian Jiet";
+        mMyUserName = LoginActivity.user.name;
 
         //Other users
         otherUsersMarkersMap = new HashMap<>();
@@ -136,6 +135,10 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private void bindViews() {
         signOut = findViewById(R.id.sign_out);
     }
+
+    //TODO PT 3-1-1, add mMap variable and link to googleMap
+
+    //TODO PT 3-2, getMyCurrentLocation(), similar to WeatherApp
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -205,6 +208,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
+    //TODO PT 3-3, updateMyCoordinatesToDatabase(), using GeoFire
+
     private void updateMyCoordinatesToDatabase() {
         Log.d(TAG, "Updating the location to database");
         mGeoFire.setLocation(mMyUserName, new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), new GeoFire.CompletionListener() {
@@ -226,6 +231,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
+    //TODO PT 3-4, initializeMyMarker(), marker and circle
+
     private void initializeMyMarker() {
         Log.d(TAG, "Setting my marker at " + mMyLocation.getLatitude() + "," + mMyLocation.getLongitude());
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
@@ -234,6 +241,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
 
+    //TODO PT 3-4-1, updateMyMarker(), marker and circle
+
     private void updateMyMarker() {
         Log.d(TAG, "Updating my marker to " + mMyLocation.getLatitude() + "," + mMyLocation.getLongitude());
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
@@ -241,6 +250,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         mMyCircle.setCenter(myLocation);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
+
+    //TODO PT 3-5, initializeGeoQuery()
 
     private void initializeGeoQuery() {
         mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), RADIUS);
@@ -252,7 +263,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                     Log.d(TAG, key + " has entered the area at " + location.latitude + "," + location.longitude + ".");
                     if (!otherUsersMarkersMap.containsKey(key)) {
                         Log.d(TAG, "Adding " + key + " to map");
-                        updateOtherMarkers(key, "onKeyEntered");
+                        updateNearbyMarkers(key, "onKeyEntered");
                     }
                 }
             }
@@ -261,7 +272,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
             public void onKeyExited(final String key) {
                 if (!key.equals(mMyUserName)) {
                     Log.d(TAG, key + " has exited the area.");
-                    updateOtherMarkers(key, "onKeyExited");
+                    updateNearbyMarkers(key, "onKeyExited");
                 }
             }
 
@@ -271,7 +282,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 if (!key.equals(mMyUserName)) {
                     Log.d(TAG, key + " has moved int the area to " + location.latitude + "," + location.longitude + ".");
                     if (otherUsersMarkersMap.containsKey(key)) {
-                        updateOtherMarkers(key, "onKeyMoved");
+                        updateNearbyMarkers(key, "onKeyMoved");
                     }
                 }
             }
@@ -289,7 +300,9 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         mGeoQuery.addGeoQueryEventListener(mGeoQueryListener);
     }
 
-    private void updateOtherMarkers(final String key, final String callback) {
+    //TODO PT 3-6, updateNearbyMarkers(string key, string callback)
+
+    private void updateNearbyMarkers(final String key, final String callback) {
         mDatabase.child("geofire").child(key).child("l").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -322,20 +335,19 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
+    //TODO PT 3-8, free up resources
+
     @Override
     protected void onPause() {
         super.onPause();
         if (mLocationManager != null) {
             mLocationManager.removeUpdates(mLocationListener);
         }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
         mGeoFire.removeLocation(mMyUserName);
         mGeoQuery.removeAllListeners();
     }
+
+    //TODO PT 3-7, userSignOut()
 
     private void userSignOut() {
         FirebaseAuth.getInstance().signOut();
