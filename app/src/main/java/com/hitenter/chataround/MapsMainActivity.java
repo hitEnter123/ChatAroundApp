@@ -1,6 +1,8 @@
 package com.hitenter.chataround;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.auth.FirebaseAuth;
 
 
@@ -22,6 +25,10 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     Button signOut;
     TextView usernameAppBar;
+
+    TextView textViewBottomSheetState;
+    Button toggleBottomSheet;
+    BottomSheetBehavior bottomSheetBehavior;
 
 
     @Override
@@ -45,6 +52,47 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
        SupportMapFragment mapFragment =(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
        mapFragment.getMapAsync(this);
+
+
+
+       ConstraintLayout bottomSheetLayout = findViewById(R.id.bottom_sheet);
+       textViewBottomSheetState = findViewById(R.id.bottom_sheet_text);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int i) {
+                switch (i) {
+                    case BottomSheetBehavior.STATE_HIDDEN:
+                        textViewBottomSheetState.setText("STATE HIDDEN");
+                        break;
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                        textViewBottomSheetState.setText("STATE EXPANDED");
+                        // update toggle button text
+                        break;
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                        textViewBottomSheetState.setText("STATE COLLAPSED");
+                        // update collapsed button text
+                        break;
+                    case BottomSheetBehavior.STATE_DRAGGING:
+                        textViewBottomSheetState.setText("STATE DRAGGING");
+                        break;
+                    case BottomSheetBehavior.STATE_SETTLING:
+                        textViewBottomSheetState.setText("STATE SETTLING");
+                        break;
+                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
+                        break;
+                }
+
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+
+            }
+        });
+
+
 
 
     }

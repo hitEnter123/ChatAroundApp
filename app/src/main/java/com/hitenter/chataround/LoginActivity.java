@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +28,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.auth.User;
 
 public class LoginActivity extends AppCompatActivity {
+    public static final String USER_PREFS= "UserPrefs";
     EditText email;
     EditText password;
     Button login;
@@ -66,6 +68,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         Log.d("findUser", "value : " + dataSnapshot.getValue(UserModel.class));
                         //TODO PT2 - 6 create static user and INTENT CONDITION
+
                         user = dataSnapshot.getValue(UserModel.class);
 
 
