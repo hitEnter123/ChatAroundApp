@@ -71,6 +71,9 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
+
+
+
                         Intent mapIntent = new Intent(LoginActivity.this, MapsMainActivity.class);
                         startActivity(mapIntent);
                         LoginActivity.this.finish();

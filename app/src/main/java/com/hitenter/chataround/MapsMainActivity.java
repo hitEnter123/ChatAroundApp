@@ -165,49 +165,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
 
 
-        ConstraintLayout bottomSheetLayout = findViewById(R.id.bottom_sheet);
-        textViewBottomSheetState = findViewById(R.id.bottom_sheet_text);
-
-        bottomSheetBehavior =BottomSheetBehavior.from(bottomSheetLayout);
-
-        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback()
-
-        {
-            @Override
-            public void onStateChanged (@NonNull View view,int i){
-                switch (i) {
-                    case BottomSheetBehavior.STATE_HIDDEN:
-                        textViewBottomSheetState.setText("STATE HIDDEN");
-                        break;
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                        textViewBottomSheetState.setText("STATE EXPANDED");
-                        // update toggle button text
-                        break;
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                        textViewBottomSheetState.setText("STATE COLLAPSED");
-                        // update collapsed button text
-                        break;
-                    case BottomSheetBehavior.STATE_DRAGGING:
-                        textViewBottomSheetState.setText("STATE DRAGGING");
-                        break;
-                    case BottomSheetBehavior.STATE_SETTLING:
-                        textViewBottomSheetState.setText("STATE SETTLING");
-                        break;
-                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        break;
-                }
-
-            }
-
-            @Override
-            public void onSlide (@NonNull View view,float v){
-
-            }
-        });
-
-
     }
-    
+
 
     @Override
     protected void onStart() {
@@ -271,11 +230,11 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
             return;
         }
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
+//        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
         mMyLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (mMyLocation == null) {
-            mMyLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        }
+//        if (mMyLocation == null) {
+//            mMyLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+//        }
         Log.d(TAG, "My last location is " + mMyLocation);
         if (mMyLocation != null) {
             updateMyCoordinatesToDatabase();
@@ -409,8 +368,12 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                     Marker marker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title(key));
                     otherUsersMarkersMap.put(key, marker);
                 } else if (callback == "onKeyExited") {
-                    otherUsersMarkersMap.get(key).remove();
-                    otherUsersMarkersMap.remove(key);
+
+                    Log.d("REMOVING MARKER", "removing marker on keyexit " );
+                    if (otherUsersMarkersMap.get(key) != null){       otherUsersMarkersMap.get(key).remove();
+                        otherUsersMarkersMap.remove(key);
+                    }
+
                 } else if (callback.equals("onKeyMoved")) {
                     otherUsersMarkersMap.get(key).setPosition(latlng);
                 }
