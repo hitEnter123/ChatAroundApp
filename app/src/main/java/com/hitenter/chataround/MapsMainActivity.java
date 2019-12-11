@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.content.Context;
@@ -56,6 +57,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     long MIN_TIME = 5000;
     //Distance between location updates (1000m or 1km)
     float MIN_DISTANCE = 1000;
+    //Query radius in km
+    double RADIUS = 5;
 
     //Member Variable
     Button signOut;
@@ -76,6 +79,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     //GeoQuery
     private GeoQuery mGeoQuery;
+    private GeoQueryEventListener mGeoQueryListener;
 
     //My details
     private String mMyUserName;
@@ -88,12 +92,18 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     LocationManager mLocationManager;
     LocationListener mLocationListener;
 
+    //Loading
+    LoadingDialogClass loadingDialogClass = new LoadingDialogClass();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps_main);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        loadingDialogClass.show(ft, "dialog");
 
         bindViews();
 
@@ -175,7 +185,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         if (mMyLocation == null) {
             mMyLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
-        Log.d(TAG, "my location is " + mMyLocation);
+        Log.d(TAG, "My last location is " + mMyLocation);
         if (mMyLocation != null) {
             updateMyCoordinatesToDatabase();
         }
@@ -185,8 +195,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
-            if (permissions.length == 1 &&
-                    permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION &&
+            if (permissions.length > 0 &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "onRequestPermissionResult(): Permission granted!");
                 getMyCurrentLocation();
@@ -207,10 +216,11 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                     Log.d(TAG, "Location saved on server successfully!");
                     if (mMyMarker == null) {
                         initializeMyMarker();
-                        initializeGeoQuery();
+                        loadingDialogClass.dismiss();
                     } else {
                         updateMyMarker();
                     }
+                    initializeGeoQuery();
                 }
             }
         });
@@ -220,7 +230,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         Log.d(TAG, "Setting my marker at " + mMyLocation.getLatitude() + "," + mMyLocation.getLongitude());
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMyMarker = mMap.addMarker(new MarkerOptions().position(myLocation).title("My current location"));
-        mMyCircle = mMap.addCircle(new CircleOptions().center(myLocation).radius(5000).strokeColor(Color.RED).fillColor(0x22f1816c).strokeWidth(5.0f));
+        mMyCircle = mMap.addCircle(new CircleOptions().center(myLocation).radius(RADIUS * 1000).strokeColor(Color.RED).fillColor(0x22f1816c).strokeWidth(5.0f));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
 
@@ -229,12 +239,13 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMyMarker.setPosition(myLocation);
         mMyCircle.setCenter(myLocation);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
 
     private void initializeGeoQuery() {
-        Log.d(TAG, "My location is " + mMyLocation.getLatitude() + "," + mMyLocation.getLongitude());
-        mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), 5);
-        mGeoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+        mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), RADIUS);
+        mGeoQuery.removeAllListeners();
+        mGeoQueryListener = new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(final String key, final GeoLocation location) {
                 if (!key.equals(mMyUserName)) {
@@ -274,7 +285,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
             public void onGeoQueryError(DatabaseError error) {
                 Log.d(TAG, "Error on GeoQuery: " + error);
             }
-        });
+        };
+        mGeoQuery.addGeoQueryEventListener(mGeoQueryListener);
     }
 
     private void updateOtherMarkers(final String key, final String callback) {
@@ -327,7 +339,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void userSignOut() {
         FirebaseAuth.getInstance().signOut();
-        Intent authPageIntent = new Intent(MapsMainActivity.this, MainActivity.class);
+        Intent authPageIntent = new Intent(MapsMainActivity.this, LoginActivity.class);
         startActivity(authPageIntent);
         MapsMainActivity.this.finish();
     }

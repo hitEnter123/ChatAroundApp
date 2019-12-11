@@ -43,7 +43,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-checkAndSignUp(email,password,confirmPassword);
+                checkAndSignUp(email, password, confirmPassword);
             }
         });
 
@@ -64,6 +64,7 @@ checkAndSignUp(email,password,confirmPassword);
 
     }
 
+    //TODO PT1 - 1 : Signup logic refer to google documentation , intent
 
     private void signUp(String email, String password) {
 
@@ -80,7 +81,7 @@ checkAndSignUp(email,password,confirmPassword);
                     Log.d("signup", "createUserWithEmail:success");
                     FirebaseUser user = firebaseAuth.getCurrentUser();
 
-                    Intent  mainActivityIntent = new Intent(SignUpActivity.this, MainActivity.class);
+                    Intent mainActivityIntent = new Intent(SignUpActivity.this, LoginActivity.class);
                     startActivity(mainActivityIntent);
                     SignUpActivity.this.finish();
                 } else {
@@ -96,45 +97,101 @@ checkAndSignUp(email,password,confirmPassword);
     }
 
 
+    //TODO PT1 -3 : Need to do some checks - empty , password matching, RegExp
     private void checkAndSignUp(EditText email, EditText password, EditText confirmPassword) {
         String emailString = email.getText().toString();
         String passwordString = password.getText().toString();
-        String confirmPasswordString = confirmPassword.getText().toString();
 
-        Pattern passwordPattern;
-        Matcher matcher;
-
-        final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[$specialCharacters])(?=\\S+$).{8,20}$";
+        Boolean emptyPass= false, similarPass= false, patternCorrect= false;
 
 
-        passwordPattern = Pattern.compile(PASSWORD_PATTERN);
-        matcher = passwordPattern.matcher(passwordString);
-
-        if(emailString.isEmpty() || passwordString.isEmpty() || confirmPasswordString.isEmpty()){
-
-            email.setError("Empty");
-            password.setError("Empty");
-            confirmPassword.setError("Empty");
-
-        } else
-
-        if (!passwordString.equals(confirmPasswordString)) {
-
-            password.setError("Password is not the same");
-            confirmPassword.setError("password is not the same");
 
 
-        }else  if (!Pattern.matches(PASSWORD_PATTERN, passwordString)) {
+        emptyPass = emptyCheck(email, password, confirmPassword);
+        similarPass = confirmPasswordCheck(password,confirmPassword);
 
-            password.setError("Doesn't match requirements : 1 Capital letter, 1 Small letter, 1 Special character");
-            confirmPassword.setError("Doesn't match requirements 1 Capital letter, 1 Small letter, 1 Special character");
-        }  else  if (Pattern.matches(PASSWORD_PATTERN, passwordString) ) {
+        if ( similarPass){
+        patternCorrect = patternCorrectCheck(email,password,confirmPassword);}
 
-            signUp(emailString, passwordString);
+        if(emptyPass && similarPass && patternCorrect)
+        {signUp(emailString,passwordString);}
+
+    }
+
+
+    private Boolean emptyCheck(EditText email, EditText password, EditText confirmPassword) {
+
+        EditText[] editTexts = {email, password, confirmPassword};
+
+        Boolean pass = false;
+
+
+        for (int i = 0; i < editTexts.length; i++) {
+
+            if (editTexts[i].getText().toString().isEmpty()) {
+
+                editTexts[i].setError("Please Fill in");
+                pass = false;
+
+            } else pass = true;
+
+
         }
+
+
+        return pass;
 
 
     }
 
 
+    private Boolean confirmPasswordCheck(EditText password, EditText confirmPassword) {
+
+
+        if (!password.getText().toString().equals(confirmPassword.getText().toString())) {
+            password.setError("Passwords do not match");
+            confirmPassword.setError("Password do not match");
+
+
+            return false;
+
+        } else return true;
+
+
+    }
+
+
+
+    private Boolean patternCorrectCheck (EditText email, EditText password, EditText confirmPassword){
+
+
+        Boolean pass = true;
+
+        final String EMAIL_ADDRESS_PATTERN =
+                "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
+                        "\\@" +
+                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+                        "(" +
+                        "\\." +
+                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+                        ")+";
+
+        final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*?[#?!@$%^&*-])(?=\\S+$).{8,20}$";
+
+
+
+        if (!Pattern.matches(EMAIL_ADDRESS_PATTERN, email.getText().toString())){
+            email.setError("This is not an email");
+            pass = false;
+        }
+
+
+        if(!Pattern.matches(PASSWORD_PATTERN, password.getText().toString()) ){
+            password.setError("Doesn't match requirements : 1 Capital letter, 1 Small letter, 1 Special character");
+            confirmPassword.setError("Doesn't match requirements 1 Capital letter, 1 Small letter, 1 Special character");
+            pass = false;
+        }
+
+return pass;
+    }
 }
