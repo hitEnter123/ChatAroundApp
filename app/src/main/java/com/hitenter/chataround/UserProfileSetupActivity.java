@@ -215,7 +215,7 @@ public class UserProfileSetupActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
 
 
-                        Intent mapsMainIntent = new Intent(UserProfileSetupActivity.this, MapsMainActivity.class);
+                        Intent mapsMainIntent = new Intent(UserProfileSetupActivity.this, LoginActivity.class);
                         startActivity(mapsMainIntent);
                         UserProfileSetupActivity.this.finish();
 

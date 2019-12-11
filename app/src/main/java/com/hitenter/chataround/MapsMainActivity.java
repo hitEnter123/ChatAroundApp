@@ -84,7 +84,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private GeoQueryEventListener mGeoQueryListener;
 
     //My details
-    private String mMyUserName;
+    private String mMyUserName = "a";
 
     //Other users
     private Map<String, Marker> otherUsersMarkersMap;
@@ -117,7 +117,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         DatabaseReference pathToGeoFire = mDatabase.child("geofire");
         mGeoFire = new GeoFire(pathToGeoFire);
 
-        //My email
+        //My name
         mMyUserName = LoginActivity.user.name;
 
         //Other users
@@ -132,18 +132,23 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
+    //TODO PT 3-2, getMyCurrentLocation(), similar to WeatherApp, in onStart
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getMyCurrentLocation();
+    }
+
     private void bindViews() {
         signOut = findViewById(R.id.sign_out);
     }
 
     //TODO PT 3-1-1, add mMap variable and link to googleMap
 
-    //TODO PT 3-2, getMyCurrentLocation(), similar to WeatherApp
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        getMyCurrentLocation();
     }
 
     private void getMyCurrentLocation() {
@@ -343,13 +348,37 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         if (mLocationManager != null) {
             mLocationManager.removeUpdates(mLocationListener);
         }
-        mGeoFire.removeLocation(mMyUserName);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         mGeoQuery.removeAllListeners();
+        mGeoFire.removeLocation(mMyUserName, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    Log.d(TAG, "There was an error removing the location to GeoFire: " + error);
+                } else {
+                    Log.d(TAG, "Location removed on server successfully!");
+                }
+            }
+        });
     }
 
     //TODO PT 3-7, userSignOut()
 
     private void userSignOut() {
+        mGeoFire.removeLocation(mMyUserName, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    Log.d(TAG, "There was an error removing the location to GeoFire: " + error);
+                } else {
+                    Log.d(TAG, "Location removed on server successfully!");
+                }
+            }
+        });
         FirebaseAuth.getInstance().signOut();
         Intent authPageIntent = new Intent(MapsMainActivity.this, LoginActivity.class);
         startActivity(authPageIntent);
