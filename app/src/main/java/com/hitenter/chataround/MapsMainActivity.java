@@ -25,19 +25,17 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.FirebaseError;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -52,9 +50,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//TODO PT1-5 create XML layout according to docs and set mapfragment
 //TODO PT 3-1, implement OnMapReadyCallback and implement all the necessary methods
-public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     //Constant
     //Logcat Tag
@@ -82,11 +79,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
 
-    Button signOut;
-    TextView usernameAppBar;
-
-
-
     //TODO PT 3-3-1, add GeoFire member variable
     //Geofire
     private GeoFire mGeoFire;
@@ -107,10 +99,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     //Loading
     LoadingDialogClass loadingDialogClass = new LoadingDialogClass();
-    TextView textViewBottomSheetState;
-    Button toggleBottomSheet;
+    ConstraintLayout bottomSheetLayout;
     BottomSheetBehavior bottomSheetBehavior;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,17 +146,53 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         });
 
 
+        final TextView textViewBottomSheetState;
+
+
+        bottomSheetLayout = findViewById(R.id.bottom_sheet);
+        textViewBottomSheetState = findViewById(R.id.bottom_sheet_text);
+
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
 
 
 
+/*
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback()
 
+        {
+            @Override
+            public void onStateChanged (@NonNull View view,int i){
+                switch (i) {
+                    case BottomSheetBehavior.STATE_HIDDEN:
+                        textViewBottomSheetState.setText("STATE HIDDEN");
+                        break;
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                        textViewBottomSheetState.setText("STATE EXPANDED");
+                        // update toggle button text
+                        break;
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                        textViewBottomSheetState.setText("STATE COLLAPSED");
+                        // update collapsed button text
+                        break;
+                    case BottomSheetBehavior.STATE_DRAGGING:
+                        textViewBottomSheetState.setText("STATE DRAGGING");
+                        break;
+                    case BottomSheetBehavior.STATE_SETTLING:
+                        textViewBottomSheetState.setText("STATE SETTLING");
+                        break;
+                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
+                        break;
+                }
 
+            }
 
+            @Override
+            public void onSlide (@NonNull View view,float v){
 
-
-
+            }
+        });
+*/
     }
-
 
     @Override
     protected void onStart() {
@@ -178,11 +204,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         signOutButton = findViewById(R.id.sign_out_button);
         recenterButton = findViewById(R.id.recenter_button);
     }
-
-
-
-
-
 
     //TODO PT 3-1-1, add mMap variable and link to googleMap
 
@@ -230,11 +251,11 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
             return;
         }
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
-//        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
         mMyLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//        if (mMyLocation == null) {
-//            mMyLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-//        }
+        if (mMyLocation == null) {
+            mMyLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        }
         Log.d(TAG, "My last location is " + mMyLocation);
         if (mMyLocation != null) {
             updateMyCoordinatesToDatabase();
@@ -369,8 +390,10 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                     otherUsersMarkersMap.put(key, marker);
                 } else if (callback == "onKeyExited") {
 
-                    Log.d("REMOVING MARKER", "removing marker on keyexit " );
-                    if (otherUsersMarkersMap.get(key) != null){       otherUsersMarkersMap.get(key).remove();
+
+                    Log.d("BUG", " key  " + key + " otherUSERS Key" + otherUsersMarkersMap.get(key));
+                    if (otherUsersMarkersMap.get(key) != null) {
+                        otherUsersMarkersMap.get(key).remove();
                         otherUsersMarkersMap.remove(key);
                     }
 
@@ -425,9 +448,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 }
             }
         });
-
-
-        //TODO PT1-6 signOut logic
         FirebaseAuth.getInstance().signOut();
         Intent authPageIntent = new Intent(MapsMainActivity.this, LoginActivity.class);
         startActivity(authPageIntent);
@@ -440,4 +460,17 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
+
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+
+        marker.getTag();
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+
+        return false;
+    }
 }
+
