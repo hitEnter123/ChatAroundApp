@@ -465,6 +465,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     public boolean onMarkerClick(Marker marker) {
 
+        
 
         marker.getTag();
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
