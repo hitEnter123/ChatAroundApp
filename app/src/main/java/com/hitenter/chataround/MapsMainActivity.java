@@ -131,7 +131,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         getMyCurrentLocation();
-        mMap.setMyLocationEnabled(true);
     }
 
     private void getMyCurrentLocation() {
@@ -159,7 +158,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 Log.d(TAG, "onProviderDisabled() callback received");
             }
         };
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    Activity#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -176,7 +175,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         if (mMyLocation == null) {
             mMyLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
-        Log.d(TAG,"my location is " + mMyLocation);
+        Log.d(TAG, "my location is " + mMyLocation);
         if (mMyLocation != null) {
             updateMyCoordinatesToDatabase();
         }
@@ -203,9 +202,9 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onComplete(String key, DatabaseError error) {
                 if (error != null) {
-                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                    Log.d(TAG, "There was an error saving the location to GeoFire: " + error);
                 } else {
-                    System.out.println("Location saved on server successfully!");
+                    Log.d(TAG, "Location saved on server successfully!");
                     if (mMyMarker == null) {
                         initializeMyMarker();
                         initializeGeoQuery();
@@ -221,8 +220,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         Log.d(TAG, "Setting my marker at " + mMyLocation.getLatitude() + "," + mMyLocation.getLongitude());
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMyMarker = mMap.addMarker(new MarkerOptions().position(myLocation).title("My current location"));
-        mMyCircle = mMap.addCircle(new CircleOptions().center(myLocation).radius(600).strokeColor(Color.RED).fillColor(0x22f1816c).strokeWidth(5.0f));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15.5f));
+        mMyCircle = mMap.addCircle(new CircleOptions().center(myLocation).radius(5000).strokeColor(Color.RED).fillColor(0x22f1816c).strokeWidth(5.0f));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
 
     private void updateMyMarker() {
@@ -230,11 +229,11 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMyMarker.setPosition(myLocation);
         mMyCircle.setCenter(myLocation);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15.5f));
     }
 
     private void initializeGeoQuery() {
-        mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), 0.6);
+        Log.d(TAG, "My location is " + mMyLocation.getLatitude() + "," + mMyLocation.getLongitude());
+        mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), 5);
         mGeoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(final String key, final GeoLocation location) {
@@ -299,8 +298,9 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 } else if (callback == "onKeyExited") {
                     otherUsersMarkersMap.get(key).remove();
                     otherUsersMarkersMap.remove(key);
-                } else if (callback.equals("onKeyMoved"))
+                } else if (callback.equals("onKeyMoved")) {
                     otherUsersMarkersMap.get(key).setPosition(latlng);
+                }
             }
 
             @Override
