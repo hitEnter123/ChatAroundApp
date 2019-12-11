@@ -270,6 +270,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void initializeGeoQuery() {
         mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), RADIUS);
+        mMap.clear();
         mGeoQuery.removeAllListeners();
         mGeoQueryListener = new GeoQueryEventListener() {
             @Override
