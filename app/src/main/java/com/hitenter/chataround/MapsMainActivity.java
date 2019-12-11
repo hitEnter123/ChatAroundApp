@@ -62,7 +62,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     double RADIUS = 5;
 
     //Member Variable
-    Button signOut;
+    Button signOutButton;
+    Button recenterButton;
 
     //Map
     private GoogleMap mMap;
@@ -124,10 +125,18 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         otherUsersMarkersMap = new HashMap<>();
 
         //SignOut
-        signOut.setOnClickListener(new View.OnClickListener() {
+        signOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 userSignOut();
+            }
+        });
+
+        //Recenter
+        recenterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recenterMarker();
             }
         });
     }
@@ -141,7 +150,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     private void bindViews() {
-        signOut = findViewById(R.id.sign_out);
+        signOutButton = findViewById(R.id.sign_out_button);
+        recenterButton = findViewById(R.id.recenter_button);
     }
 
     //TODO PT 3-1-1, add mMap variable and link to googleMap
@@ -340,7 +350,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
-    //TODO PT 3-8, free up resources
+    //TODO PT 3-9, free up resources
 
     @Override
     protected void onPause() {
@@ -383,5 +393,12 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         Intent authPageIntent = new Intent(MapsMainActivity.this, LoginActivity.class);
         startActivity(authPageIntent);
         MapsMainActivity.this.finish();
+    }
+
+    //TODO PT 3-8, recenterMyself()
+
+    private void recenterMarker(){
+        LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
 }
