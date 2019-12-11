@@ -252,6 +252,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         Log.d(TAG, "Setting my marker at " + mMyLocation.getLatitude() + "," + mMyLocation.getLongitude());
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMyMarker = mMap.addMarker(new MarkerOptions().position(myLocation).title("My current location"));
+        mMyMarker.setTag(mMyUserName);
         mMyCircle = mMap.addCircle(new CircleOptions().center(myLocation).radius(RADIUS * 1000).strokeColor(Color.RED).fillColor(0x22f1816c).strokeWidth(5.0f));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
@@ -270,7 +271,12 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void initializeGeoQuery() {
         mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), RADIUS);
-        mMap.clear();
+        for(Map.Entry<String,Marker> entry : otherUsersMarkersMap.entrySet()){
+            String key = entry.getKey();
+            Marker value = entry.getValue();
+            value.remove();
+            otherUsersMarkersMap.remove(key);
+        }
         mGeoQuery.removeAllListeners();
         mGeoQueryListener = new GeoQueryEventListener() {
             @Override
@@ -334,13 +340,20 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 }
                 LatLng latlng = new LatLng(lat, lon);
                 if (callback == "onKeyEntered") {
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title(key));
-                    otherUsersMarkersMap.put(key, marker);
+                    if (otherUsersMarkersMap.get(key) != null) {
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title(key));
+                        marker.setTag(key);
+                        otherUsersMarkersMap.put(key, marker);
+                    }
                 } else if (callback == "onKeyExited") {
-                    otherUsersMarkersMap.get(key).remove();
-                    otherUsersMarkersMap.remove(key);
+                    if (otherUsersMarkersMap.get(key) != null) {
+                        otherUsersMarkersMap.get(key).remove();
+                        otherUsersMarkersMap.remove(key);
+                    }
                 } else if (callback.equals("onKeyMoved")) {
-                    otherUsersMarkersMap.get(key).setPosition(latlng);
+                    if (otherUsersMarkersMap.get(key) != null) {
+                        otherUsersMarkersMap.get(key).setPosition(latlng);
+                    }
                 }
             }
 
@@ -398,7 +411,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     //TODO PT 3-8, recenterMyself()
 
-    private void recenterMarker(){
+    private void recenterMarker() {
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
