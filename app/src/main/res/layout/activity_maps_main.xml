@@ -37,10 +37,25 @@
             android:orientation="horizontal"
             tools:layout_editor_absoluteX="-16dp">
 
+            <Button
+                android:id="@+id/recenter_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="172dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/custom_button"
+                android:text="Recenter"
+                android:textColor="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="@+id/map"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.659"
+                app:layout_constraintStart_toEndOf="@+id/sign_out_button"
+                app:layout_constraintTop_toTopOf="@+id/sign_out_button"
+                app:layout_constraintVertical_bias="0.0" />
 
 
             <Button
-                android:id="@+id/sign_out"
+                android:id="@+id/sign_out_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/custom_button"
