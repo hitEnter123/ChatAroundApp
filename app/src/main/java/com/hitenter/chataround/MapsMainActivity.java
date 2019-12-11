@@ -85,7 +85,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private GeoQueryEventListener mGeoQueryListener;
 
     //My details
-    private String mMyUserName = "a";
+    private String mMyUserName;
 
     //Other users
     private Map<String, Marker> otherUsersMarkersMap;
@@ -141,8 +141,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
-    //TODO PT 3-2, getMyCurrentLocation(), similar to WeatherApp, in onStart
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -160,6 +158,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
     }
+
+    //TODO PT 3-2, getMyCurrentLocation(), similar to WeatherApp, in onStart
 
     private void getMyCurrentLocation() {
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
