@@ -2,7 +2,6 @@ package com.hitenter.chataround;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
@@ -19,19 +18,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -52,7 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//TODO PT1-5 create XML layout according to docs and set mapfragment
 //TODO PT 3-1, implement OnMapReadyCallback and implement all the necessary methods
 public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -82,11 +76,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
 
-    Button signOut;
-    TextView usernameAppBar;
-
-
-
     //TODO PT 3-3-1, add GeoFire member variable
     //Geofire
     private GeoFire mGeoFire;
@@ -107,10 +96,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     //Loading
     LoadingDialogClass loadingDialogClass = new LoadingDialogClass();
-    TextView textViewBottomSheetState;
-    Button toggleBottomSheet;
-    BottomSheetBehavior bottomSheetBehavior;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,60 +139,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 recenterMarker();
             }
         });
-
-
-
-
-
-
-
-
-
-
-
-        ConstraintLayout bottomSheetLayout = findViewById(R.id.bottom_sheet);
-        textViewBottomSheetState = findViewById(R.id.bottom_sheet_text);
-
-        bottomSheetBehavior =BottomSheetBehavior.from(bottomSheetLayout);
-
-        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback()
-
-        {
-            @Override
-            public void onStateChanged (@NonNull View view,int i){
-                switch (i) {
-                    case BottomSheetBehavior.STATE_HIDDEN:
-                        textViewBottomSheetState.setText("STATE HIDDEN");
-                        break;
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                        textViewBottomSheetState.setText("STATE EXPANDED");
-                        // update toggle button text
-                        break;
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                        textViewBottomSheetState.setText("STATE COLLAPSED");
-                        // update collapsed button text
-                        break;
-                    case BottomSheetBehavior.STATE_DRAGGING:
-                        textViewBottomSheetState.setText("STATE DRAGGING");
-                        break;
-                    case BottomSheetBehavior.STATE_SETTLING:
-                        textViewBottomSheetState.setText("STATE SETTLING");
-                        break;
-                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        break;
-                }
-
-            }
-
-            @Override
-            public void onSlide (@NonNull View view,float v){
-
-            }
-        });
-
-
     }
-    
 
     @Override
     protected void onStart() {
@@ -219,11 +151,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         signOutButton = findViewById(R.id.sign_out_button);
         recenterButton = findViewById(R.id.recenter_button);
     }
-
-
-
-
-
 
     //TODO PT 3-1-1, add mMap variable and link to googleMap
 
@@ -462,9 +389,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 }
             }
         });
-
-
-        //TODO PT1-6 signOut logic
         FirebaseAuth.getInstance().signOut();
         Intent authPageIntent = new Intent(MapsMainActivity.this, LoginActivity.class);
         startActivity(authPageIntent);
@@ -473,7 +397,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     //TODO PT 3-8, recenterMyself()
 
-    private void recenterMarker() {
+    private void recenterMarker(){
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
     }
