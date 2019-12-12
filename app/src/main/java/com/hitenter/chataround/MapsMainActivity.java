@@ -515,7 +515,9 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                     if (otherUsersMarkersMap.get(key) != null) {
                         otherUsersMarkersMap.get(key).remove();
                         otherUsersMarkersMap.remove(key);
-                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                        if(nowTalkingTo == key){
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);}
                     }
                 } else if (callback.equals("onKeyMoved")) {
                     if (otherUsersMarkersMap.get(key) != null) {
