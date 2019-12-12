@@ -540,11 +540,12 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
 
 
-    
+
     @Override
     protected void onStop() {
         super.onStop();
 
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         if (mGeoQuery != null) {
             mGeoQuery.removeAllListeners();
             mGeoFire.removeLocation(mMyUserName, new GeoFire.CompletionListener() {
