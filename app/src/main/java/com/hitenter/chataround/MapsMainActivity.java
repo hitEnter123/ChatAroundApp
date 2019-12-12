@@ -139,6 +139,16 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     final ArrayList<String> tempKey = new ArrayList<>();
 
+
+
+
+
+    //TODO PT4-12 Close bottomsheet
+    @Override
+    public void onBackPressed() {
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -196,6 +206,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
 
 
+
         //TODO PT4-10-2 Read data from database with ValueEventListener
         final ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
@@ -210,7 +221,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                         Log.d("CHAT", "Message :  " + message.message);
                         mRecyclerView.setAdapter(msgAdapter);
                         mRecyclerView.setLayoutManager(llm);
-                        mRecyclerView.scrollToPosition(messageList.size());
+                        mRecyclerView.scrollToPosition(msgAdapter.getItemCount()-1);
                     }
 
                 }
@@ -526,6 +537,10 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
+
+
+
+    
     @Override
     protected void onStop() {
         super.onStop();
