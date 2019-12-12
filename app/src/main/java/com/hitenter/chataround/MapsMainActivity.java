@@ -157,8 +157,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 //        mRecyclerView.setAdapter(msgAdapter);
 
 
-        LinearLayoutManager llm = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(llm);
+        final LinearLayoutManager llm = new LinearLayoutManager(this);
 
 
         //Initialize firebase database
@@ -203,7 +202,6 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()
                 ) {
-                    Log.d("CHAT", "snapshot   key" + snapshot.getKey());
                     InstantMessage message = snapshot.getValue(InstantMessage.class);
 
                     if (!tempKey.contains(snapshot.getKey())) {
@@ -211,7 +209,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                         messageList.add(message);
                         Log.d("CHAT", "Message :  " + message.message);
                         mRecyclerView.setAdapter(msgAdapter);
-                        mRecyclerView.scrollToPosition(msgAdapter.getItemCount() - 1);
+                        mRecyclerView.setLayoutManager(llm);
+                        mRecyclerView.scrollToPosition(messageList.size());
                     }
 
                 }

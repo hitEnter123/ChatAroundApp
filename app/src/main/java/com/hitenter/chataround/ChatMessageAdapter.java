@@ -1,5 +1,6 @@
 package com.hitenter.chataround;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +40,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageViewHold
 
         InstantMessage msg = this.messageList.get(position);
 
+        Log.d("MESSAGE", "onBindViewHolder:  position" +  position + "message $" + msg.getMessage());
 
             if (msg.getMessageType().equals("MSG_RECEIVED")) {
 
@@ -64,5 +66,15 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageViewHold
 
         }
         return messageList.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 }
