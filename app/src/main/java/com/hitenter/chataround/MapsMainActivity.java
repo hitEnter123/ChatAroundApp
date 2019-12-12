@@ -522,6 +522,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                             tempKey.clear();
                             msgAdapter.notifyDataSetChanged();
                             nowTalkingTo = "";
+                            talkingTo.setText("");
 
 
                         }
