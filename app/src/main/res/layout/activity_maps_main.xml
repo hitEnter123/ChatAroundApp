@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MapsMainActivity">
@@ -29,55 +30,55 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:gravity="center"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
             android:orientation="horizontal"
+            android:background="#FFBB33"
+            android:gravity="center"
             tools:layout_editor_absoluteX="-16dp">
-
-            <Button
-                android:id="@+id/recenter_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="172dp"
-                android:layout_marginBottom="24dp"
-                android:background="@drawable/custom_button"
-                android:text="Recenter"
-                android:textColor="@android:color/white"
-                app:layout_constraintBottom_toBottomOf="@+id/map"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.659"
-                app:layout_constraintStart_toEndOf="@+id/sign_out_button"
-                app:layout_constraintTop_toTopOf="@+id/sign_out_button"
-                app:layout_constraintVertical_bias="0.0" />
-
 
             <Button
                 android:id="@+id/sign_out_button"
                 android:layout_width="wrap_content"
+                android:layout_gravity="start"
+
                 android:layout_height="wrap_content"
                 android:background="@drawable/custom_button"
                 android:text="Sign Out"
-                android:textColor="@android:color/white"
-                app:layout_constraintBottom_toBottomOf="@+id/map"
-                app:layout_constraintEnd_toEndOf="@+id/map"
-                app:layout_constraintHorizontal_bias="0.049"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.976" />
+                android:textColor="@android:color/white" />
+
+
+
             <TextView
                 android:id="@+id/username_appbar"
-                android:layout_width="match_parent"
+                android:layout_width="150dp"
                 android:layout_height="55dp"
+                android:layout_gravity="start"
                 android:background="@drawable/custom_button"
                 android:gravity="center"
                 android:text=""
                 android:textColor="@android:color/white"
                 android:textFontWeight="800"
                 android:textSize="30dp"
+
                 />
+
+
+
+
+            <Button
+            android:id="@+id/recenter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="0dp"
+
+            android:background="@drawable/custom_button"
+            android:text="Recenter"
+            android:textColor="@android:color/white" />
+
 
         </LinearLayout>
 

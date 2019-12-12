@@ -1,11 +1,14 @@
 package com.hitenter.chataround;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
@@ -19,7 +22,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.Calendar;
+
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -39,6 +47,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.FirebaseError;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -46,12 +55,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 //TODO PT 3-1, implement OnMapReadyCallback and implement all the necessary methods
-public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+//TODO PT 4-4, implement onMarkerClickListener
+public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraMoveListener {
 
     //Constant
     //Logcat Tag
@@ -63,6 +76,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     float MIN_DISTANCE = 1000;
     //Query radius in km
     double RADIUS = 5;
+    //Zoom
+    float ZOOM = 15.5f;
 
     //Member Variable
     Button signOutButton;
@@ -94,13 +109,35 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private Map<String, Marker> otherUsersMarkersMap;
 
     //Location Manager
-    LocationManager mLocationManager;
-    LocationListener mLocationListener;
+    private LocationManager mLocationManager;
+    private LocationListener mLocationListener;
 
     //Loading
     LoadingDialogClass loadingDialogClass = new LoadingDialogClass();
-    ConstraintLayout bottomSheetLayout;
-    BottomSheetBehavior bottomSheetBehavior;
+
+
+    //BottomSheet
+    private ConstraintLayout bottomSheetLayout;
+    private BottomSheetBehavior bottomSheetBehavior;
+    private TextView talkingTo;
+
+    private RecyclerView mRecyclerView;
+    private EditText messageEnterEditText;
+    private Button sendButton;
+
+
+
+    String nowTalkingTo = "";
+
+
+
+
+
+    List<InstantMessage> messageList = new ArrayList<InstantMessage>();
+    final ChatMessageAdapter msgAdapter = new ChatMessageAdapter(messageList);
+
+
+    final ArrayList<String> tempKey = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,10 +146,20 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        loadingDialogClass.show(ft, "dialog");
 
         bindViews();
+
+
+        //TODO PT4-9 Adapter Setup (*to be moved later*)
+//        final ChatMessageAdapter msgAdapter = new ChatMessageAdapter(messageList);
+//        LinearLayoutManager llm = new LinearLayoutManager(this);
+//        mRecyclerView.setLayoutManager(llm);
+//        mRecyclerView.setAdapter(msgAdapter);
+
+
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(llm);
+
 
         //Initialize firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -146,52 +193,97 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         });
 
 
-        final TextView textViewBottomSheetState;
-
-
-        bottomSheetLayout = findViewById(R.id.bottom_sheet);
-        textViewBottomSheetState = findViewById(R.id.bottom_sheet_text);
-
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
 
 
 
-/*
-        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback()
 
-        {
+        //TODO PT4-10-2 Read data from database with ValueEventListener
+        final ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
-            public void onStateChanged (@NonNull View view,int i){
-                switch (i) {
-                    case BottomSheetBehavior.STATE_HIDDEN:
-                        textViewBottomSheetState.setText("STATE HIDDEN");
-                        break;
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                        textViewBottomSheetState.setText("STATE EXPANDED");
-                        // update toggle button text
-                        break;
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                        textViewBottomSheetState.setText("STATE COLLAPSED");
-                        // update collapsed button text
-                        break;
-                    case BottomSheetBehavior.STATE_DRAGGING:
-                        textViewBottomSheetState.setText("STATE DRAGGING");
-                        break;
-                    case BottomSheetBehavior.STATE_SETTLING:
-                        textViewBottomSheetState.setText("STATE SETTLING");
-                        break;
-                    case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        break;
-                }
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()
+                ) {
+                    Log.d("CHAT", "snapshot   key" + snapshot.getKey());
+                    InstantMessage message = snapshot.getValue(InstantMessage.class);
 
+                    if (!tempKey.contains(snapshot.getKey())) {
+                        tempKey.add(snapshot.getKey());
+                        messageList.add(message);
+                        Log.d("CHAT", "Message :  " + message.message);
+                        mRecyclerView.setAdapter(msgAdapter);
+                        mRecyclerView.scrollToPosition(msgAdapter.getItemCount() - 1);
+                    }
+
+                }
             }
 
             @Override
-            public void onSlide (@NonNull View view,float v){
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+
+        //TODO PT4-3 BottomSheet logic
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+        //TESTING BOTTOMSHEETBEHAVIOR SET STATE
+        //bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int i) {
+                //TODO PT4-10-1 Read when expanded
+
+                if (i == BottomSheetBehavior.STATE_EXPANDED) {
+
+                    Log.d("CHAT", "onStateChanged:  EXPANDED ! ");
+
+                    DatabaseReference readMessageRef = FirebaseDatabase.getInstance().getReference().child("messages/");
+                    if (nowTalkingTo != "")
+                        readMessageRef.child(mMyUserName).child(nowTalkingTo).addValueEventListener(valueEventListener);
+
+//                    readMessageRef.child(mMyUserName).child(nowTalkingTo).addChildEventListener(childEventListener);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
 
             }
         });
-*/
+
+
+        //TODO PT4-6 Sending message to a dummy
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //REF
+                DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference().child("messages/");
+
+
+                String message = messageEnterEditText.getText().toString();
+                String sendingTo = talkingTo.getText().toString();
+                String sendingFrom = mMyUserName;
+
+                Date currentTime = Calendar.getInstance().getTime();
+
+                Log.d("CHAT", "onClick:  message Is " + message);
+                //Create a message for send and receive
+                InstantMessage newMessageSend = new InstantMessage(message, sendingFrom, InstantMessage.MSG_SENT, currentTime.toString());
+                InstantMessage newMessageReceive = new InstantMessage(message, sendingFrom, InstantMessage.MSG_RECEIVED, currentTime.toString());
+
+                Log.d("CHAT", "onClick:  message Is " + newMessageSend.getTime());
+
+
+                messageRef.child(sendingFrom).child(sendingTo).push().setValue(newMessageSend);
+                messageRef.child(sendingTo).child(sendingFrom).push().setValue(newMessageReceive);
+
+
+                messageEnterEditText.setText("");
+
+            }
+        });
+
+
     }
 
     @Override
@@ -203,13 +295,21 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     private void bindViews() {
         signOutButton = findViewById(R.id.sign_out_button);
         recenterButton = findViewById(R.id.recenter_button);
+        messageEnterEditText = findViewById(R.id.message_edit_text);
+        sendButton = findViewById(R.id.send_button);
+        mRecyclerView = findViewById(R.id.message_recycler_view);
+        bottomSheetLayout = findViewById(R.id.bottom_sheet);
+        talkingTo = findViewById(R.id.bottom_sheet_text);
+
     }
 
-    //TODO PT 3-1-1, add mMap variable and link to googleMap
 
+    //TODO PT 3-1-1, add mMap variable and link to googleMap
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMarkerClickListener(this);
+
     }
 
     //TODO PT 3-2, getMyCurrentLocation(), similar to WeatherApp, in onStart
@@ -289,7 +389,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                     Log.d(TAG, "Location saved on server successfully!");
                     if (mMyMarker == null) {
                         initializeMyMarker();
-                        loadingDialogClass.dismiss();
+//                        loadingDialogClass.dismiss();
                     } else {
                         updateMyMarker();
                     }
@@ -305,8 +405,9 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         Log.d(TAG, "Setting my marker at " + mMyLocation.getLatitude() + "," + mMyLocation.getLongitude());
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMyMarker = mMap.addMarker(new MarkerOptions().position(myLocation).title("My current location"));
+        mMyMarker.setTag(mMyUserName);
         mMyCircle = mMap.addCircle(new CircleOptions().center(myLocation).radius(RADIUS * 1000).strokeColor(Color.RED).fillColor(0x22f1816c).strokeWidth(5.0f));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, ZOOM));
     }
 
     //TODO PT 3-4-1, updateMyMarker(), marker and circle
@@ -316,23 +417,28 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
         mMyMarker.setPosition(myLocation);
         mMyCircle.setCenter(myLocation);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, ZOOM));
     }
 
     //TODO PT 3-5, initializeGeoQuery()
 
     private void initializeGeoQuery() {
         mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(mMyLocation.getLatitude(), mMyLocation.getLongitude()), RADIUS);
+        for (Map.Entry<String, Marker> entry : otherUsersMarkersMap.entrySet()) {
+            String key = entry.getKey();
+            Marker value = entry.getValue();
+            value.remove();
+        }
+        otherUsersMarkersMap.clear();
         mGeoQuery.removeAllListeners();
         mGeoQueryListener = new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(final String key, final GeoLocation location) {
                 if (!key.equals(mMyUserName)) {
                     Log.d(TAG, key + " has entered the area at " + location.latitude + "," + location.longitude + ".");
-                    if (!otherUsersMarkersMap.containsKey(key)) {
-                        Log.d(TAG, "Adding " + key + " to map");
-                        updateNearbyMarkers(key, "onKeyEntered");
-                    }
+                    Log.d("ENTER", "Adding " + key + " to map");
+                    updateNearbyMarkers(key, "onKeyEntered");
+
                 }
             }
 
@@ -371,7 +477,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     //TODO PT 3-6, updateNearbyMarkers(string key, string callback)
 
     private void updateNearbyMarkers(final String key, final String callback) {
-        mDatabase.child("geofire").child(key).child("l").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabase.child("geofire").child(key).child("l").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 double lat = 0;
@@ -386,19 +492,21 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 }
                 LatLng latlng = new LatLng(lat, lon);
                 if (callback == "onKeyEntered") {
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title(key));
-                    otherUsersMarkersMap.put(key, marker);
+                    if (!otherUsersMarkersMap.containsKey(key)) {
+                        Log.d("ENTER", "adding marker   " + otherUsersMarkersMap);
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(latlng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title(key));
+                        marker.setTag(key);
+                        otherUsersMarkersMap.put(key, marker);
+                    }
                 } else if (callback == "onKeyExited") {
-
-
-                    Log.d("BUG", " key  " + key + " otherUSERS Key" + otherUsersMarkersMap.get(key));
                     if (otherUsersMarkersMap.get(key) != null) {
                         otherUsersMarkersMap.get(key).remove();
                         otherUsersMarkersMap.remove(key);
                     }
-
                 } else if (callback.equals("onKeyMoved")) {
-                    otherUsersMarkersMap.get(key).setPosition(latlng);
+                    if (otherUsersMarkersMap.get(key) != null) {
+                        otherUsersMarkersMap.get(key).setPosition(latlng);
+                    }
                 }
             }
 
@@ -422,17 +530,20 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
     @Override
     protected void onStop() {
         super.onStop();
-        mGeoQuery.removeAllListeners();
-        mGeoFire.removeLocation(mMyUserName, new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                if (error != null) {
-                    Log.d(TAG, "There was an error removing the location to GeoFire: " + error);
-                } else {
-                    Log.d(TAG, "Location removed on server successfully!");
+
+        if (mGeoQuery != null) {
+            mGeoQuery.removeAllListeners();
+            mGeoFire.removeLocation(mMyUserName, new GeoFire.CompletionListener() {
+                @Override
+                public void onComplete(String key, DatabaseError error) {
+                    if (error != null) {
+                        Log.d(TAG, "There was an error removing the location to GeoFire: " + error);
+                    } else {
+                        Log.d(TAG, "Location removed on server successfully!");
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     //TODO PT 3-7, userSignOut()
@@ -458,20 +569,42 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void recenterMarker() {
         LatLng myLocation = new LatLng(mMyLocation.getLatitude(), mMyLocation.getLongitude());
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12.3f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, ZOOM));
     }
 
 
+    //TODO PT 4-5
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        
-
-        marker.getTag();
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        Log.d("CHAT", "onMarkerClick:  MARKER CLICKED !" + marker.getTag());
+        if (marker.getTag() != LoginActivity.user.name) {
 
 
+
+            //TODO PT 4-11 Add logic for talking to another person
+            if (!marker.getTag().toString().equals(nowTalkingTo)) {
+
+                nowTalkingTo = marker.getTag().toString();
+                messageList.clear();
+                tempKey.clear();
+                msgAdapter.notifyDataSetChanged();
+
+                Log.d("CHAT", "nowTalkingTo " + nowTalkingTo);
+            }
+
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+
+            talkingTo.setText(marker.getTag().toString());
+        }
         return false;
+    }
+
+    @Override
+    public void onCameraMove() {
+
+
     }
 }
 
