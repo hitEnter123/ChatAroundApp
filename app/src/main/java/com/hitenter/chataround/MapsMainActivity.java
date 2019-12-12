@@ -516,8 +516,15 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                         otherUsersMarkersMap.get(key).remove();
                         otherUsersMarkersMap.remove(key);
 
-                        if(nowTalkingTo == key){
-                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);}
+                        if(nowTalkingTo.equals(key)){
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                            messageList.clear();
+                            tempKey.clear();
+                            msgAdapter.notifyDataSetChanged();
+                            nowTalkingTo = "";
+
+
+                        }
                     }
                 } else if (callback.equals("onKeyMoved")) {
                     if (otherUsersMarkersMap.get(key) != null) {
