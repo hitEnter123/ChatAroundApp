@@ -267,6 +267,8 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onClick(View v) {
                 //REF
+
+                if(nowTalkingTo!= ""){
                 DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference().child("messages/");
 
 
@@ -288,7 +290,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 messageRef.child(sendingTo).child(sendingFrom).push().setValue(newMessageReceive);
 
 
-                messageEnterEditText.setText("");
+                messageEnterEditText.setText("");}
 
             }
         });
@@ -457,6 +459,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                 if (!key.equals(mMyUserName)) {
                     Log.d(TAG, key + " has exited the area.");
                     updateNearbyMarkers(key, "onKeyExited");
+
                 }
             }
 
@@ -512,6 +515,7 @@ public class MapsMainActivity extends AppCompatActivity implements OnMapReadyCal
                     if (otherUsersMarkersMap.get(key) != null) {
                         otherUsersMarkersMap.get(key).remove();
                         otherUsersMarkersMap.remove(key);
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                     }
                 } else if (callback.equals("onKeyMoved")) {
                     if (otherUsersMarkersMap.get(key) != null) {
